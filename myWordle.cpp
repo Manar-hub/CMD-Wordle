@@ -9,7 +9,6 @@
 
 using namespace std;
 
-// ---- utilities ----
 string to_lower_str(string s) {
     transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return tolower(c); });
     return s;
@@ -22,7 +21,7 @@ string trim(const string& s) {
     return s.substr(a, b - a);
 }
 
-// ---- load words (from file) ----
+//Load words from file
 vector<string> load_words(const string& filename) {
     ifstream in(filename);
     vector<string> words;
@@ -39,7 +38,7 @@ vector<string> load_words(const string& filename) {
     return words;
 }
 
-// ---- pick a random secret ----
+//pick a random secret
 string pick_random(const vector<string>& words) {
     static random_device rd;
     static mt19937 gen(rd());
@@ -47,25 +46,25 @@ string pick_random(const vector<string>& words) {
     return words[dist(gen)];
 }
 
-// ---- compute feedback (Wordle rules for repeated letters handled) ----
+//compute feedback (Wordle rules for repeated letters handled)
 vector<char> get_feedback(const string& secret, const string& guess) {
-    // 'G' = green, 'Y' = yellow, 'B' = black (absent)
+    //'G' = green, 'Y' = yellow, 'B' = black
     vector<char> res(5, 'B');
     vector<bool> used(5, false);
 
-    // 1) mark greens and mark those positions used
+    //mark greens and mark those positions used
     for (int i = 0; i < 5; ++i) {
         if (guess[i] == secret[i]) {
             res[i] = 'G';
             used[i] = true;
         }
     }
-    // 2) count remaining letters in secret
+    //count remaining letters in secret
     int counts[26] = { 0 };
     for (int i = 0; i < 5; ++i)
         if (!used[i]) counts[secret[i] - 'a']++;
 
-    // 3) mark yellows for the non-green letters if the secret still has that letter available
+    //mark yellows for the non-green letters if the secret still has that letter available
     for (int i = 0; i < 5; ++i) {
         if (res[i] == 'G') continue;
         int idx = guess[i] - 'a';
@@ -77,11 +76,11 @@ vector<char> get_feedback(const string& secret, const string& guess) {
     return res;
 }
 
-// ---- pretty print feedback (ANSI colors, many terminals support these) ----
+//ANSI color printing
 void print_feedback(const string& guess, const vector<char>& fb) {
-    const string GREEN = "\033[1;32m"; // bright green
-    const string YELLOW = "\033[1;33m"; // bright yellow
-    const string GRAY = "\033[1;90m"; // gray
+    const string GREEN = "\033[1;32m";   //bright green
+    const string YELLOW = "\033[1;33m";  //bright yellow
+    const string GRAY = "\033[1;90m";    //gray
     const string RESET = "\033[0m";
     for (int i = 0; i < 5; ++i) {
         char C = toupper(guess[i]);
@@ -94,22 +93,22 @@ void print_feedback(const string& guess, const vector<char>& fb) {
 }
 
 int main(int argc, char** argv) {
-    // single declaration of words
+    //single declaration of words
     vector<string> words;
 
-    // 1) Load from command-line argument if provided
+    //Load from command-line argument if provided
     if (argc >= 2) {
         words = load_words(argv[1]);
         if (words.empty()) cerr << "Warning: couldn't load words from " << argv[1] << ". Using built-in list.\n";
     }
 
-    // 2) Fallback to default path
+    //Fallback to default path
     if (words.empty()) {
         string filename = "C:\\Users\\PC\\Downloads\\myWordle\\x64\\Debug\\words.txt";
         words = load_words(filename);
     }
 
-    // 3) Fallback to built-in list
+    //Fallback to built-in list
     if (words.empty()) {
         words = { "crane","slate","glory","point","brown","laugh","baker","fling","ghost","apple","mango","tiger","drink","skate","storm" };
     }
@@ -144,6 +143,7 @@ int main(int argc, char** argv) {
             return 0;
         }
     }
-    cout << "Out of tries — the word was \"" << secret << "\".\n";
+    cout << "Out of tries â€” the word was \"" << secret << "\".\n";
     return 0;
 }
+
